@@ -49,7 +49,7 @@ if "openai_key" in st.session_state:
         if submitted:
             with st.spinner():
                 llm = OpenAI(api_token=st.session_state.openai_key)
-                x = pandas_ai.run(st.session_state.df, prompt=question)
+                x = model.chat(question)
 
                 if os.path.isfile('temp_chart.png'):
                     im = plt.imread('temp_chart.png')
