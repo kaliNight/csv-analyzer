@@ -39,7 +39,7 @@ if "openai_key" in st.session_state:
         )
         if uploaded_file is not None:
             df = pd.read_csv(uploaded_file)
-            model=SmartDataframe(df,config={"llm":llm}
+            model=SmartDataframe(df,config={"llm":llm})
             st.session_state.df = df
 
     with st.form("Question"):
