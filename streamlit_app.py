@@ -1,11 +1,9 @@
 import streamlit as st
 import pandas as pd
-from pandasai.llm import OpenAI, Starcoder, Falcon
-from pandasai import SmartDataframe
+from pandasai import PandasAI
+from pandasai.llm.openai import OpenAI
 import matplotlib.pyplot as plt
 import os
-
-
 
 llm=OpenAI(api_token=st.secrets["OPENAI_API_KEY"])
 
@@ -20,8 +18,6 @@ if llm_model is not None:
         llm=Starcoder(api_token=st.secrets["HUGGINGFACE_API_KEY"])
 else:
     st.write(":red[Please Select LLM Model]")
-
-
 
 if "openai_key" not in st.session_state:
     with st.form("API key"):
@@ -40,7 +36,6 @@ if "openai_key" in st.session_state:
         )
         if uploaded_file is not None:
             df = pd.read_csv(uploaded_file)
-            model=SmartDataframe(df,config={"llm":llm})
             st.session_state.df = df
 
     with st.form("Question"):
@@ -49,7 +44,8 @@ if "openai_key" in st.session_state:
         if submitted:
             with st.spinner():
                 llm = OpenAI(api_token=st.session_state.openai_key)
-                x = model.chat(question)
+                pandas_ai = PandasAI(llm)
+                x = pandas_ai.run(st.session_state.df, prompt=question)
 
                 if os.path.isfile('temp_chart.png'):
                     im = plt.imread('temp_chart.png')
@@ -64,6 +60,8 @@ if "openai_key" in st.session_state:
         st.subheader("Current dataframe:")
         st.write(st.session_state.df)
 
+    st.subheader("Prompt history:")
+    st.write(st.session_state.prompt_history)
 
 
 if st.button("Clear"):
