@@ -63,4 +63,3 @@ with gr.Blocks() as demo:
 
 
 # Launch the interface with public link with  authentication
-demo.launch(debug=True)
