@@ -7,12 +7,12 @@ from pandasai.llm import OpenAI,Falcon,Starcoder
 from pandasai import SmartDataframe,SmartDatalake
 
 # Made the OpenAi as default llm
-llm=OpenAI(api_token="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")
+llm=OpenAI(api_token="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")
 
 # Ask the user for selecting the llm model from radio button
 def llm_function(llm_model):
   if llm_model=="OpenAi":
-    llm=OpenAI(api_token="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")
+    llm=OpenAI(api_token="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")
   elif llm_model=="Falcon":
     llm=Falcon(api_token="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")
   else:
