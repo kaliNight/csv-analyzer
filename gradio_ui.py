@@ -8,15 +8,15 @@ from pandasai.llm import OpenAI,Falcon,Starcoder
 from pandasai import SmartDataframe,SmartDatalake
 
 # Set default llm
-llm=OpenAI(api_token=OPENAI_API_KEY)
+llm=OpenAI(api_token=os.getenv(OPENAI_API_KEY))
 
 def llm_function(llm_model):
   if llm_model=="OpenAi":
-    llm=OpenAI(api_token=OPENAI_API_KEY)
+    llm=OpenAI(api_token=os.getenv(OPENAI_API_KEY))
   elif llm_model=="Falcon":
-    llm=Falcon(api_token=HUGGINGFACE_API_KEY)
+    llm=Falcon(api_token=os.getenv(HUGGINGFACE_API_KEY))
   else:
-    llm=Starcoder(api_token=HUGGINGFACE_API_KEY)
+    llm=Starcoder(api_token=os.getenv(HUGGINGFACE_API_KEY))
   print(llm_model)
 
 # Show the saved plot to the user
