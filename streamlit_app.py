@@ -1,23 +1,15 @@
 import streamlit as st
 import pandas as pd
-from pandasai import PandasAI
 from pandasai.llm.openai import OpenAI
 import matplotlib.pyplot as plt
 import os
 
-llm=OpenAI(api_token=st.secrets["OPENAI_API_KEY"])
+st.title("pandas-ai streamlit interface")
 
-llm_model = st.radio("**LLM Model**",["OpenAI", "Falcon", "Starcoder"],horizontal=True)
-
-if llm_model is not None:
-    if llm_model=="OpenAI":
-        llm=OpenAI(api_token=st.secrets["OPENAI_API_KEY"])
-    elif llm_model=="Falcon":
-        llm=Falcon(api_token=st.secrets["HUGGINGFACE_API_KEY"])
-    else:
-        llm=Starcoder(api_token=st.secrets["HUGGINGFACE_API_KEY"])
-else:
-    st.write(":red[Please Select LLM Model]")
+st.write("A demo interface for [PandasAI](https://github.com/gventuri/pandas-ai)")
+st.write(
+    "Looking for an example *.csv-file?, check [here](https://gist.github.com/netj/8836201) (Download ZIP)."
+)
 
 if "openai_key" not in st.session_state:
     with st.form("API key"):
@@ -44,8 +36,8 @@ if "openai_key" in st.session_state:
         if submitted:
             with st.spinner():
                 llm = OpenAI(api_token=st.session_state.openai_key)
-                pandas_ai = PandasAI(llm)
-                x = pandas_ai.run(st.session_state.df, prompt=question)
+                model=SmartDataframe(st.session_state.df,config={"llm":llm})
+                x = model.chat(question)
 
                 if os.path.isfile('temp_chart.png'):
                     im = plt.imread('temp_chart.png')
