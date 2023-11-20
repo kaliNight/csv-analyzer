@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from pandasai.llm import OpenAI,SmartDataframe
+from pandasai.llm import OpenAI, Starcoder, Falcon
+from pandasai import SmartDataframe
 import matplotlib.pyplot as plt
 import os
 
