@@ -41,6 +41,7 @@ def response(prompt):
 
 # Gradio interface
 with gr.Blocks() as demo:
+  gr.Markdown("# CSV Analyzer")
   # Radio button to select the llm model
   list_llm=gr.Radio(["OpenAi","Falcon","Starcoder"],label="LLM Models",default="OpenAi")
   list_llm.change(llm_function,list_llm)
