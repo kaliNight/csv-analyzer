@@ -7,27 +7,33 @@ from pandasai import PandasAI
 from pandasai.llm import OpenAI,Falcon,Starcoder
 from pandasai import SmartDataframe,SmartDatalake
 
+# Set default llm
+llm=OpenAI(api_token=OPENAI_API_KEY)
+
+def llm_function(llm_model):
+  if llm_model=="OpenAi":
+    llm=OpenAI(api_token=OPENAI_API_KEY)
+  elif llm_model=="Falcon":
+    llm=Falcon(api_token=HUGGINGFACE_API_KEY)
+  else:
+    llm=Starcoder(api_token=HUGGINGFACE_API_KEY)
+  print(llm_model)
 
 # Show the saved plot to the user
 def show_plot():
   return "temp_chart.png"
 
 # Upload the csv file
-def upload_file(files,llm_model,api_key):
+def upload_file(files):
     file_paths = [file.name for file in files]
     df=pd.read_csv(files.name)
-    if llm_model=="OpenAi":
-      llm=OpenAI(api_token=api_key)
-    elif llm_model=="Falcon":
-      llm=Falcon(api_token=api_key)
-    else:
-      llm=Starcoder(api_token=api_key)
     global model
     model=SmartDataframe(df,config={"llm":llm})
     return df.head(5)
 
 # Generate the string response and plot according to the prompt
 def response(prompt):
+  global response
   response=model.chat(prompt)
   if response==None:
     return "Click on Show Plot Button"
@@ -36,16 +42,13 @@ def response(prompt):
 # Gradio interface
 with gr.Blocks() as demo:
   # Radio button to select the llm model
-  with gr.Row():
-    with gr.Column():
-      list_llm=gr.Radio(["OpenAi","Falcon","Starcoder"],label="LLM Models",default="OpenAi")
-    with gr.Column():
-      api_key=gr.Textbox(label="LLM Model Api Key")
+  list_llm=gr.Radio(["OpenAi","Falcon","Starcoder"],label="LLM Models",default="OpenAi")
+  list_llm.change(llm_function,list_llm)
 
   # Button to upload the csv file
   upload_button = gr.UploadButton("Click to Browse CSV File", file_types=["CSV"])
   dataframe=gr.inputs.Dataframe()
-  upload_button.upload(upload_file, [upload_button,list_llm,api_key], dataframe)
+  upload_button.upload(upload_file,upload_button, dataframe)
 
   # Input output box for prompt and string response
   with gr.Row():
