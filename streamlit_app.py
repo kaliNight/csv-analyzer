@@ -1,62 +1,60 @@
 import streamlit as st
 import pandas as pd
+from pandasai.llm import OpenAI,Falcon,Starcoder
 from pandasai import SmartDataframe
-from pandasai.llm.openai import OpenAI
 import matplotlib.pyplot as plt
 import os
 
-st.title("pandas-ai streamlit interface")
 
-st.write("A demo interface for [PandasAI](https://github.com/gventuri/pandas-ai)")
-st.write(
-    "Looking for an example *.csv-file?, check [here](https://gist.github.com/netj/8836201) (Download ZIP)."
-)
+st.title("CSV Analyzer")
 
-if "openai_key" not in st.session_state:
-    with st.form("API key"):
-        key = st.text_input("OpenAI Key", value="", type="password")
-        if st.form_submit_button("Submit"):
-            st.session_state.openai_key = key
-            st.session_state.prompt_history = []
-            st.session_state.df = None
-            st.success('Saved API key for this session.')
+# st.write(st.secrets["HUGGINGFACE_API_KEY"])
+# if st.secrets["HUGGINGFACE_API_KEY"]:
+#     st.write("True")
 
-if "openai_key" in st.session_state:
-    if st.session_state.df is None:
-        uploaded_file = st.file_uploader(
-            "Choose a CSV file. This should be in long format (one datapoint per row).",
-            type="csv",
-        )
-        if uploaded_file is not None:
-            df = pd.read_csv(uploaded_file)
-            st.session_state.df = df
+llm=OpenAI(api_token=st.secrets["OPENAI_API_KEY"])
 
-    with st.form("Question"):
-        question = st.text_input("Question", value="", type="default")
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            with st.spinner():
-                llm = OpenAI(api_token=st.session_state.openai_key)
-                model=SmartDataframe(st.session_state.df,config={"llm":llm})
-                x = model.chat(question)
+llm_model = st.radio("**LLM Model**",["OpenAI", "Falcon", "Starcoder"],horizontal=True)
 
+if llm_model is not None:
+    if llm_model=="OpenAI":
+        llm=OpenAI(api_token=st.secrets["OPENAI_API_KEY"])
+    elif llm_model=="Falcon":
+        llm=Falcon(api_token=st.secrets["HUGGINGFACE_API_KEY"])
+    else:
+        llm=Starcoder(api_token=st.secrets["HUGGINGFACE_API_KEY"])
+else:
+    st.write(":red[Please Select LLM Model]")
+
+
+csv_file = st.file_uploader("Click to Browse CSV File",type="csv")
+
+if csv_file is not None:
+    df=pd.read_csv(csv_file)
+    model=SmartDataframe(df,config={"llm":llm})
+    st.write(df.head(5))
+
+
+prompt=st.text_input(label="**Prompt**")
+button=st.button(label="**Generate Response**")
+
+if button:
+    if prompt:
+        with st.spinner("Generating response..."):
+            response=model.chat(prompt)
+            if response==None:
                 if os.path.isfile('temp_chart.png'):
                     im = plt.imread('temp_chart.png')
                     st.image(im)
                     os.remove('temp_chart.png')
-
-                if x is not None:
-                    st.write(x)
-                st.session_state.prompt_history.append(question)
-
-    if st.session_state.df is not None:
-        st.subheader("Current dataframe:")
-        st.write(st.session_state.df)
-
-    st.subheader("Prompt history:")
-    st.write(st.session_state.prompt_history)
+            else:
+                st.text_input(label="Output",value=response)
+    else:
+        st.write(":red[Please Write the Prompt]")
 
 
-if st.button("Clear"):
-    st.session_state.prompt_history = []
-    st.session_state.df = None
+
+
+
+
+
